@@ -30,9 +30,9 @@ extern "C" {
 
 #ifndef __PIKA_PARSER__H
 #define __PIKA_PARSER__H
-#include "PikaVM.h"
-#include "dataQueueObj.h"
-#include "dataStack.h"
+#include "PikaVM.h"         // TODO: don't include this
+#include "dataQueueObj.h"   // TODO: don't include this
+#include "dataStack.h"      // TODO: don't include this
 
 typedef QueueObj AST;
 

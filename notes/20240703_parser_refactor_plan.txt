@@ -1,0 +1,18 @@
+Parser Refactor Plan
+1. refactor the include .h files and interfaces in header, to make parser's architecture more clear.
+    - internal functions do not write in .h files, and they should be static
+    - internal structs and enums do not write in .h files
+    - interface which supplies to outside of Pika Kernel should begin with 'Pika'
+    - name of structs or functions should obey the specific rule (especially those in .h files)
+        > struct: Name (use typedef)
+        > enum: enum Name (content: NAME_TYPE_1)
+        > function: parser_do_something
+        > macro: NAME_DO_SOMETHING
+        > variable: linux_style_var (and do not use '_' prefix unless it's obsolete)
+2. rename the interface
+3. clean redundant logic
+4. refactor the parser's architecture
+
+Reference
+1. parser: https://spricoder.github.io/categories/2020-%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/
+    - the guide: https://spricoder.github.io/2021/01/16/2020-Compilation-Principle/2020-Compilation-Principle-Overview/
