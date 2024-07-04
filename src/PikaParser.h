@@ -128,60 +128,14 @@ struct Cursor {
     PIKA_RES result;
 };
 
-char* Lexer_getTokenStream(Args* outBuffs, char* stmt);
-char* Lexer_printTokenStream(Args* outBuffs, char* tokenStream);
-
-char* pika_file2Asm(Args* outBuffs, char* filename);
 char* pika_lines2Asm(Args* outBuffs, char* multiLine);
-char* pika_lines2Array(char* lines);
 char* pika_line2Asm(Args* buffs_p, char* line, Stack* blockStack);
-AST* parser_line2Ast(Parser* self, char* line);
-char* parser_file2Doc(Parser* self, char* sPyFile);
 int parser_file2DocFile(Parser* self, char* sPyFile, char* sDocFile);
-char* parser_ast2Asm(Parser* self, AST* ast);
-char* parser_lines2Doc(Parser* self, char* sPyLines);
-char* parser_file2Doc(Parser* self, char* filename);
-AST* line2Ast(char* line);
-
 PIKA_RES pika_lines2Bytes(ByteCodeFrame* bf, char* py_lines);
-char* parser_line2Target(Parser* self, char* line);
-
 Parser* parser_create(void);
 int parser_deinit(Parser* parser);
-
-char* Cursor_popLastToken(Args* outBuffs, char** pStmt, char* str);
-char* Cursor_getCleanStmt(Args* outBuffs, char* cmd);
-uint8_t Cursor_count(char* stmt, TokenType type, char* pyload);
-uint8_t _Cursor_count(char* stmt,
-                      TokenType type,
-                      char* pyload,
-                      pika_bool bSkipbracket);
-
-AST* AST_parseStmt(AST* ast, char* stmt);
-AST* AST_create(void);
-char* AST_genAsm_top(AST* oAST, Args* outBuffs);
 int32_t AST_deinit(AST* ast);
-
-char* instructUnit_fromAsmLine(Args* outBuffs, char* pikaAsm);
 ByteCodeFrame* byteCodeFrame_appendFromAsm(ByteCodeFrame* bf, char* pikaAsm);
-
-#define _Cursor_forEach(cursor)  \
-    _Cursor_beforeIter(&cursor); \
-    for (int __i = 0; __i < cursor.length; __i++)
-
-#define Cursor_forEachExistPs(cursor, stmt) \
-    /* init parserStage */                  \
-    _Cursor_init(&cursor);                  \
-    _Cursor_parse(&cursor, stmt);           \
-    _Cursor_forEach(cursor)
-
-#define Cursor_forEach(cursor, stmt) \
-    struct Cursor cursor;            \
-    Cursor_forEachExistPs(cursor, stmt)
-
-uint16_t TokenStream_getSize(char* tokenStream);
-Arg* arg_strAddIndent(Arg* aStrIn, int indent);
-Arg* arg_strAddIndentMuti(Arg* aStrIn, int indent);
 
 #endif
 
