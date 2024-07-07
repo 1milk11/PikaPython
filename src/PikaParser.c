@@ -216,6 +216,7 @@ Arg* Lexer_setSymbel(Arg* aTokenStream,
     sSymbolBuff = args_getBuff(&buffs, i - *iSymbolStartIndex_p);
     pika_platform_memcpy(sSymbolBuff, stmt + *iSymbolStartIndex_p,
                          i - *iSymbolStartIndex_p);
+    // TODO: redundant logic
     /* literal */
     if ((sSymbolBuff[0] == '\'') || (sSymbolBuff[0] == '"')) {
         /* "" or '' */
@@ -249,7 +250,7 @@ __exit:
 /* a token is [TOKENTYPE|(CONTENT)] */
 char* Lexer_getTokenStream(Args* outBuffs, char* sStmt) {
     /* init */
-    Arg* aTokenStream = New_arg(NULL);
+    Arg* aTokenStream = New_arg(NULL);  // TODO: unnecessary
     aTokenStream = arg_setStr(aTokenStream, "", "");
     int32_t iSize = strGetSize(sStmt);
     uint8_t uBracketDeepth = 0;
@@ -272,7 +273,7 @@ char* Lexer_getTokenStream(Args* outBuffs, char* sStmt) {
         /* update char */
         cn2 = 0;
         cn1 = 0;
-        c0 = sStmt[i];
+        c0 = sStmt[i];  // stmt: statement, expr: expression
         c1 = 0;
         c2 = 0;
         c3 = 0;
@@ -602,7 +603,7 @@ char* Lexer_getTokenStream(Args* outBuffs, char* sStmt) {
 }
 
 static uint8_t Lexer_isError(char* line) {
-    Args buffs = {0};
+    Args buffs = {0};   // TODO: Args is void **, it should be NULL
     uint8_t uRes = 0; /* not error */
     char* sTokenStream = Lexer_getTokenStream(&buffs, line);
     if (NULL == sTokenStream) {
