@@ -46,7 +46,7 @@ struct InstructUnit {
     uint8_t isNewLine_instruct;
     uint16_t const_pool_index;
 };
-
+// TODO: ConstPool and InstructArray is similar, can extract their common part
 typedef struct ConstPool ConstPool;
 struct ConstPool {
     Arg* arg_buff;

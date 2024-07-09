@@ -1,0 +1,6 @@
+Refactor Plan:
+1. clean the interface of PikaVM
+2. delete useless functions
+3. refactor the arcitecture, solve the problem of dependencies of inner modules
+
+Reference:

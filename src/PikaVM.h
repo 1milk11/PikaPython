@@ -30,8 +30,8 @@ extern "C" {
 
 #ifndef __PIKA_VM__H
 #define __PIKA_VM__H
-#include "PikaObj.h"
-#include "dataQueue.h"
+#include "PikaObj.h"        // TODO: cause PikaParser include PikaObj
+#include "dataQueue.h"      // TODO: data* files should be public lib
 #include "dataQueueObj.h"
 #include "dataStack.h"
 #if PIKA_SETJMP_ENABLE
@@ -105,8 +105,8 @@ struct VMState {
     VM_SIGNAL_CTRL signal_ctrl;
     int vm_cnt;
 #if PIKA_EVENT_ENABLE
-    PikaEventQueue cq;
-    PikaEventQueue sq;
+    PikaEventQueue cq;      // TODO: seems like nvme protocol
+    PikaEventQueue sq;      // cq: completion queue, sq: submission queue
     int event_pickup_cnt;
     pika_platform_thread_t* event_thread;
     pika_bool event_thread_exit;
@@ -144,86 +144,44 @@ struct VMInstructionSet {
 
 VMParameters* pikaVM_run(PikaObj* self, char* pyLine);
 VMParameters* pikaVM_runAsm(PikaObj* self, char* pikaAsm);
-VMParameters* _pikaVM_runByteCodeFrame(PikaObj* self,
-                                       ByteCodeFrame* byteCode_frame,
-                                       pika_bool in_repl);
-VMParameters* _pikaVM_runByteCodeFrameGlobals(PikaObj* self,
-                                              PikaObj* globals,
-                                              ByteCodeFrame* byteCode_frame,
-                                              pika_bool in_repl);
-VMParameters* pikaVM_runByteCodeFrame(PikaObj* self,
-                                      ByteCodeFrame* byteCode_frame);
+// TODO: why PikaObj.c call this interface
+VMParameters* pikaVM_runByteCodeFrame(PikaObj* self, ByteCodeFrame* byteCode_frame);
 
-static inline int instructUnit_getBlockDeepth(InstructUnit* self) {
-    return self->deepth & 0x0F;
-}
-
-static inline int instructUnit_getInvokeDeepth(InstructUnit* self) {
-    return self->deepth >> 4;
-}
-
+// TODO: called by PikaCompier
 static inline enum InstructIndex instructUnit_getInstructIndex(
     InstructUnit* self) {
     return (enum InstructIndex)(self->isNewLine_instruct & 0x7F);
 }
 
-static inline int instructUnit_getConstPoolIndex(InstructUnit* self) {
-    return self->const_pool_index;
-}
-
-static inline int instructUnit_getIsNewLine(InstructUnit* self) {
-    return self->isNewLine_instruct >> 7;
-}
-
+// TODO: called by PikaParser
 static inline void instructUnit_setBlockDeepth(InstructUnit* self, int val) {
     self->deepth |= (0x0F & val);
 }
-
 static inline void instructUnit_setConstPoolIndex(InstructUnit* self, int val) {
     self->const_pool_index = val;
 }
-
 static inline void instructUnit_setInvokeDeepth(InstructUnit* self, int val) {
     self->deepth |= ((0x0F & val) << 4);
 }
-
 static inline void instructUnit_setInstruct(InstructUnit* self, int val) {
     self->isNewLine_instruct |= (0x7F & val);
 }
-
 static inline void instructUnit_setIsNewLine(InstructUnit* self, int val) {
     self->isNewLine_instruct |= ((0x01 & val) << 7);
 }
-
-InstructUnit* New_instructUnit(uint8_t data_size);
-void instructUnit_deinit(InstructUnit* self);
-
 enum InstructIndex pikaVM_getInstructFromAsm(char* line);
-
-void constPool_init(ConstPool* self);
-void constPool_deinit(ConstPool* self);
 void constPool_append(ConstPool* self, char* content);
-
-static inline void* constPool_getStart(ConstPool* self) {
-    return self->content_start;
-}
-
 static inline int constPool_getLastOffset(ConstPool* self) {
     return self->size;
 }
 
+static inline void* constPool_getStart(ConstPool* self) {
+    return self->content_start;
+}
+// TODO: called by PikaCompier
 static inline char* constPool_getByOffset(ConstPool* self, int offset) {
     return (char*)((uintptr_t)constPool_getStart(self) + (uintptr_t)offset);
 }
-
-static inline char* PikaVMFrame_getConstWithInstructUnit(
-    PikaVMFrame* vm,
-    InstructUnit* ins_unit) {
-    return constPool_getByOffset(&(vm->bytecode_frame->const_pool),
-                                 instructUnit_getConstPoolIndex(ins_unit));
-}
-
-pika_bool PikaVMFrame_checkBreakPoint(PikaVMFrame* vm);
 
 typedef struct {
     PikaObj* globals;
@@ -231,106 +189,37 @@ typedef struct {
     char* module_name;
 } pikaVM_run_ex_cfg;
 
-char* constPool_getNow(ConstPool* self);
-char* constPool_getNext(ConstPool* self);
-char* constPool_getByIndex(ConstPool* self, uint16_t index);
-void constPool_print(ConstPool* self);
-
 void byteCodeFrame_init(ByteCodeFrame* bf);
 void byteCodeFrame_deinit(ByteCodeFrame* bf);
-void byteCodeFrame_setName(ByteCodeFrame* self, char* name);
-size_t byteCodeFrame_getSize(ByteCodeFrame* bf);
-InstructUnit* byteCodeFrame_findInstructUnit(ByteCodeFrame* bcframe,
-                                             int32_t iPcStart,
-                                             enum InstructIndex index,
-                                             int32_t* iOffset_p,
-                                             pika_bool bIsForward);
-InstructUnit* byteCodeFrame_findInsUnitBackward(ByteCodeFrame* bcframe,
-                                                int32_t pc_start,
-                                                enum InstructIndex index,
-                                                int32_t* p_offset);
-InstructUnit* byteCodeFrame_findInsForward(ByteCodeFrame* bcframe,
-                                           int32_t pc_start,
-                                           enum InstructIndex index,
-                                           int32_t* p_offset);
-Hash byteCodeFrame_getNameHash(ByteCodeFrame* bcframe);
-void instructArray_init(InstructArray* ins_array);
-void instructArray_deinit(InstructArray* ins_array);
+// TODO: called by PikaParser
 void instructArray_append(InstructArray* ins_array, InstructUnit* ins_unit);
-void instructUnit_init(InstructUnit* ins_unit);
-void instructUnit_print(InstructUnit* self);
-void instructArray_print(InstructArray* self);
-
-static inline InstructUnit* instructArray_getStart(InstructArray* self) {
-    return (InstructUnit*)self->content_start;
-}
-
-static inline size_t instructArray_getSize(InstructArray* self) {
-    return (size_t)self->size;
-}
-
-static inline int PikaVMFrame_getInstructArraySize(PikaVMFrame* vm) {
-    return instructArray_getSize(&(vm->bytecode_frame->instruct_array));
-}
-
-static inline InstructUnit* instructArray_getByOffset(InstructArray* self,
-                                                      int offset) {
-    return (InstructUnit*)((uintptr_t)instructArray_getStart(self) +
-                           (uintptr_t)offset);
-}
-
-static inline InstructUnit* PikaVMFrame_getInstructUnitWithOffset(
-    PikaVMFrame* vm,
-    int offset) {
-    return instructArray_getByOffset(&(vm->bytecode_frame->instruct_array),
-                                     vm->pc + offset);
-}
-
-static inline InstructUnit* PikaVMFrame_getInstructNow(PikaVMFrame* vm) {
-    return instructArray_getByOffset(&(vm->bytecode_frame->instruct_array),
-                                     vm->pc);
-}
-
 void byteCodeFrame_print(ByteCodeFrame* self);
-
+// TODO: called by PikaCompier
 static inline size_t instructUnit_getSize(void) {
     return (size_t)sizeof(InstructUnit);
 }
-
+// TODO: called by PikaParser
 uint16_t constPool_getOffsetByData(ConstPool* self, char* data);
-void instructArray_printWithConst(InstructArray* self, ConstPool* const_pool);
-void constPool_update(ConstPool* self);
-void instructArray_update(InstructArray* self);
-void constPool_printAsArray(ConstPool* self);
-void instructArray_printAsArray(InstructArray* self);
+// TODO: called by PikaCompier
 void byteCodeFrame_loadByteCode(ByteCodeFrame* self, uint8_t* bytes);
+// TODO: called by PikaParser
 void byteCodeFrame_printAsArray(ByteCodeFrame* self);
-void byteCodeFrame_init(ByteCodeFrame* self);
-pika_bool pikaVM_registerInstructionSet(VMInstructionSet* ins_set);
+
 VMParameters* pikaVM_runByteCode(PikaObj* self, const uint8_t* bytecode);
+// TODO: called by PikaObj, and why
 VMParameters* pikaVM_runByteCodeInconstant(PikaObj* self, uint8_t* bytecode);
 Arg* pikaVM_runByteCodeReturn(PikaObj* self,
                               const uint8_t* bytecode,
                               char* returnName);
-Arg* pikaVM_runByteCode_exReturn(PikaObj* self,
-                                 VMParameters* locals,
-                                 VMParameters* globals,
-                                 uint8_t* bytecode,
-                                 PikaVMThread* vm_thread,
-                                 pika_bool is_const_bytecode,
-                                 char* return_name);
+// TODO: called by PikaCompier
 InstructUnit* instructArray_getNow(InstructArray* self);
 InstructUnit* instructArray_getNext(InstructArray* self);
+
 VMParameters* pikaVM_runSingleFile(PikaObj* self, char* filename);
 VMParameters* pikaVM_runByteCodeFile(PikaObj* self, char* filename);
+// TODO: called by PikaObj, and why
 Arg* obj_runMethodArg(PikaObj* self, PikaObj* method_args_obj, Arg* method_arg);
 PikaObj* pikaVM_runFile(PikaObj* self, char* file_name);
-Arg* _vm_slice(PikaVMFrame* vm,
-               PikaObj* self,
-               Arg* end,
-               Arg* obj,
-               Arg* start,
-               int step);
 
 typedef struct {
     VMParameters* locals;
@@ -340,24 +229,13 @@ typedef struct {
     pika_bool is_const_bytecode;
 } pikaVM_runBytecode_ex_cfg;
 
+// TODO: called by PikaObj, and why
 VMParameters* pikaVM_runByteCode_ex(PikaObj* self,
                                     uint8_t* bytecode,
                                     pikaVM_runBytecode_ex_cfg* cfg);
-
-void _do_byteCodeFrame_loadByteCode(ByteCodeFrame* self,
-                                    uint8_t* bytes,
-                                    char* name,
-                                    pika_bool is_const);
 Arg* _vm_get(PikaVMFrame* vm, PikaObj* self, Arg* key, Arg* obj);
-VM_SIGNAL_CTRL VMSignal_getCtrl(void);
 void pika_vm_exit(void);
 void pika_vm_exit_await(void);
-void pika_vmSignal_setCtrlClear(void);
-PIKA_RES __eventListener_popEvent(PikaEventListener** lisener_p,
-                                  uintptr_t* id,
-                                  Arg** eventData,
-                                  int* signal,
-                                  int* head);
 PIKA_RES __eventListener_pushEvent(PikaEventListener* lisener,
                                    uintptr_t eventId,
                                    Arg* eventData);
@@ -366,14 +244,11 @@ PIKA_RES __eventListener_pushSignal(PikaEventListener* lisener,
                                     int signal);
 int _VMEvent_getVMCnt(void);
 void __VMEvent_pickupEvent(char* info);
-void _pikaVM_yield(void);
 int _VM_lock_init(void);
 int _VM_is_first_lock(void);
 PIKA_RES pika_debug_set_break(char* module_name, int pc_break);
 void pika_debug_set_trace(PikaObj* self);
 PIKA_RES pika_debug_reset_break(char* module_name, int pc_break);
-pika_bool pika_debug_check_break_hash(Hash module_hash, int pc_break);
-pika_bool pika_debug_check_break(char* module_name, int pc_break);
 
 #define _VMEvent_pickupEvent() __VMEvent_pickupEvent(__FILE__)
 #define PIKA_INS(__INS_NAME) _##PIKA_VM_INS_##__INS_NAME

@@ -37,6 +37,59 @@
 #include <math.h>
 #endif
 
+static inline int instructUnit_getBlockDeepth(InstructUnit* self) {
+    return self->deepth & 0x0F;
+}
+
+static inline int instructUnit_getInvokeDeepth(InstructUnit* self) {
+    return self->deepth >> 4;
+}
+
+static inline int instructUnit_getConstPoolIndex(InstructUnit* self) {
+    return self->const_pool_index;
+}
+
+static inline int instructUnit_getIsNewLine(InstructUnit* self) {
+    return self->isNewLine_instruct >> 7;
+}
+
+static inline char* PikaVMFrame_getConstWithInstructUnit(
+    PikaVMFrame* vm,
+    InstructUnit* ins_unit) {
+    return constPool_getByOffset(&(vm->bytecode_frame->const_pool),
+                                 instructUnit_getConstPoolIndex(ins_unit));
+}
+
+static inline InstructUnit* instructArray_getStart(InstructArray* self) {
+    return (InstructUnit*)self->content_start;
+}
+
+static inline size_t instructArray_getSize(InstructArray* self) {
+    return (size_t)self->size;
+}
+
+static inline int PikaVMFrame_getInstructArraySize(PikaVMFrame* vm) {
+    return instructArray_getSize(&(vm->bytecode_frame->instruct_array));
+}
+
+static inline InstructUnit* instructArray_getByOffset(InstructArray* self,
+                                                      int offset) {
+    return (InstructUnit*)((uintptr_t)instructArray_getStart(self) +
+                           (uintptr_t)offset);
+}
+
+static inline InstructUnit* PikaVMFrame_getInstructUnitWithOffset(
+    PikaVMFrame* vm,
+    int offset) {
+    return instructArray_getByOffset(&(vm->bytecode_frame->instruct_array),
+                                     vm->pc + offset);
+}
+
+static inline InstructUnit* PikaVMFrame_getInstructNow(PikaVMFrame* vm) {
+    return instructArray_getByOffset(&(vm->bytecode_frame->instruct_array),
+                                     vm->pc);
+}
+
 static pika_thread_recursive_mutex_t g_pikaGIL = {0};
 volatile VMState g_PikaVMState = {
     .signal_ctrl = VM_SIGNAL_CTRL_NONE,
