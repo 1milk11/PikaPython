@@ -185,7 +185,7 @@ static inline char* constPool_getByOffset(ConstPool* self, int offset) {
 
 typedef struct {
     PikaObj* globals;
-    pika_bool in_repl;
+    pika_bool in_repl;  // repl means Read-Evaluate-Print-Loop, it's interactive cmd console
     char* module_name;
 } pikaVM_run_ex_cfg;
 

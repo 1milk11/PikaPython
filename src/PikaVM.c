@@ -4656,7 +4656,7 @@ static VMParameters* __pikaVM_runByteCodeFrameWithState(
     stack_deinit(&(vm->stack));
     g_PikaVMState.vm_cnt--;
     VMParameters* result = locals;
-    pikaFree(vm, sizeof(PikaVMFrame));
+    pikaFree(vm, sizeof(PikaVMFrame));  // TODO: free memory need size parameter ?
     self->vmFrame = NULL;
     return result;
 }
@@ -4824,7 +4824,7 @@ PikaObj* pikaVM_runFile(PikaObj* self, char* file_name) {
 
 void _pikaVM_yield(void) {
 #if PIKA_EVENT_ENABLE
-    if (!pika_GIL_isInit()) {
+    if (!pika_GIL_isInit()) {   // GIL: Global Interpreter Lock, process in single thread
         _VMEvent_pickupEvent();
     }
 #endif

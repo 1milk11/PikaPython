@@ -4,3 +4,7 @@ Refactor Plan:
 3. refactor the arcitecture, solve the problem of dependencies of inner modules
 
 Reference:
+1. dis --- Python 字节码反汇编器: https://docs.python.org/zh-cn/3/library/dis.html
+2. Python 字节码介绍: https://linuxstory.org/python-bytecode-introduction/
+3. 上条的原文: An introduction to Python bytecode:
+    https://opensource.com/article/18/4/introduction-python-bytecode
