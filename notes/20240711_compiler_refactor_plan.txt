@@ -1,0 +1,6 @@
+Refactor Plan:
+1. clean the interface in PikaCompiler.h
+2. clear the relationship over important functions
+3. refactor it
+
+Reference:
