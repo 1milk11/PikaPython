@@ -34,9 +34,8 @@ extern "C" {
 #include "PikaVM.h"
 #include "PikaObj.h"
 
-PIKA_RES pika_lines2Bytes(ByteCodeFrame* bf, char* py_lines);
+PIKA_RES pika_lines2Bytes(ByteCodeFrame *bf, char* py_lines);
 char* pika_lines2Asm(Args* outBuffs, char* multiLine);
-ByteCodeFrame* byteCodeFrame_appendFromAsm(ByteCodeFrame* bf, char* pikaAsm);
 
 #endif
 

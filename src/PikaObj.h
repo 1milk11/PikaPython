@@ -53,7 +53,7 @@ struct ConstPool {
     uint32_t content_offset_now;
     uint32_t size;
     void* content_start;
-    void (*output_redirect_fun)(ConstPool* self, char* content);
+    void (*output_redirect_fun)(ConstPool *self, char* content);
     FILE* output_f;
 };
 
@@ -63,7 +63,7 @@ struct InstructArray {
     uint32_t content_offset_now;
     uint32_t size;
     void* content_start;
-    void (*output_redirect_fun)(InstructArray* self, InstructUnit* ins_unit);
+    void (*output_redirect_fun)(InstructArray *self, InstructUnit *ins_unit);
     FILE* output_f;
 };
 
@@ -127,7 +127,7 @@ struct PikaVMFrame {
     Stack stack;
     int32_t jmp;
     int32_t pc;
-    ByteCodeFrame* bytecode_frame;
+    ByteCodeFrame *bytecode_frame;
     uint8_t loop_deepth;
     uint32_t ins_cnt;
     pika_bool in_super;
@@ -156,7 +156,7 @@ struct PikaObj {
 #endif
     uint8_t refcnt;
     uint16_t flag;
-    PikaVMFrame* vmFrame;
+    PikaVMFrame *vmFrame;
 };
 
 typedef struct PikaGC PikaGC;
@@ -240,14 +240,14 @@ struct MethodInfo {
     char* typelist;
     PikaObj* def_context;
     ArgType type;
-    ByteCodeFrame* bytecode_frame;
+    ByteCodeFrame *bytecode_frame;
 };
 
 typedef struct MethodProp {
     void* ptr;
     char* type_list;
     char* name;
-    ByteCodeFrame* bytecode_frame;
+    ByteCodeFrame *bytecode_frame;
     PikaObj* def_context;
     PikaObj* host_obj;
     char* declareation;
@@ -322,13 +322,13 @@ int32_t class_defineObjectMethod(PikaObj* self,
                                  char* declareation,
                                  Method methodPtr,
                                  PikaObj* def_context,
-                                 ByteCodeFrame* bytecode_frame);
+                                 ByteCodeFrame *bytecode_frame);
 
 int32_t class_defineStaticMethod(PikaObj* self,
                                  char* declareation,
                                  Method methodPtr,
                                  PikaObj* def_context,
-                                 ByteCodeFrame* bytecode_frame);
+                                 ByteCodeFrame *bytecode_frame);
 
 int32_t class_defineConstructor(PikaObj* self,
                                 char* name,
@@ -339,7 +339,7 @@ int32_t class_defineRunTimeConstructor(PikaObj* self,
                                        char* declareation,
                                        Method methodPtr,
                                        PikaObj* def_context,
-                                       ByteCodeFrame* bytecode_frame);
+                                       ByteCodeFrame *bytecode_frame);
 
 int32_t obj_removeArg(PikaObj* self, char* argPath);
 pika_bool obj_isArgExist(PikaObj* self, char* argPath);
@@ -382,7 +382,7 @@ char* methodArg_getName(Arg* method_arg, char* buffs, size_t size);
 Arg* methodArg_setHostObj(Arg* method_arg, PikaObj* host_obj);
 Arg* methodArg_super(Arg* aThis, NativeProperty** p_prop);
 PikaObj* methodArg_getHostObj(Arg* method_arg);
-ByteCodeFrame* methodArg_getBytecodeFrame(Arg* method_arg);
+ByteCodeFrame *methodArg_getBytecodeFrame(Arg* method_arg);
 Method methodArg_getPtr(Arg* method_arg);
 
 VMParameters* obj_run(PikaObj* self, char* cmd);
@@ -437,14 +437,7 @@ struct FilterItem {
 
 #endif
 
-typedef struct {
-    int max_size;
-    int current;
-    int count;
-    int last_offset;
-    char** history;
-    int cached_current;
-} ShellHistory;
+typedef struct ShellHistory ShellHistory;
 
 struct ShellConfig {
 #if PIKA_SHELL_FILTER_ENABLE
@@ -471,16 +464,6 @@ struct ShellConfig {
     PikaObj* locals;
     PikaObj* globals;
 };
-
-#if PIKA_SHELL_HISTORY_ENABLE
-ShellHistory* shHistory_create(int max_size);
-void shHistory_destroy(ShellHistory* self);
-void shHistory_add(ShellHistory* self, char* command);
-void shHistory_setMaxSize(ShellHistory* self, int max_size);
-char* shHistory_get(ShellHistory* self, int index);
-char* shHistory_getPrev(ShellHistory* self);
-char* shHistory_getNext(ShellHistory* self);
-#endif
 
 void _do_pikaScriptShell(PikaObj* self, ShellConfig* cfg);
 
@@ -560,7 +543,7 @@ LibObj* pika_getLibObj(void);
 
 PikaObj* obj_importModuleWithByteCodeFrame(PikaObj* self,
                                            char* name,
-                                           ByteCodeFrame* bytecode_frame);
+                                           ByteCodeFrame *bytecode_frame);
 PikaObj* obj_importModuleWithByteCode(PikaObj* self,
                                       char* name,
                                       uint8_t* byteCode);
@@ -822,25 +805,13 @@ void pika_debug_bytes(uint8_t* buff, size_t len);
         pika_assert(obj_checkAlive((__obj))); \
     } while (0)
 
-void obj_appendGcChain(PikaObj* self);
-void obj_removeGcChain(PikaObj* self);
 void obj_enableGC(PikaObj* self);
 pika_bool obj_checkAlive(PikaObj* self);
 void obj_setName(PikaObj* self, char* name);
 
-void pikaGC_mark(void);
-void pikaGC_markDump(void);
-void pikaGC_lock(void);
-void pikaGC_unlock(void);
-pika_bool pikaGC_islock(void);
-uint32_t pikaGC_count(void);
-uint32_t pikaGC_countMarked(void);
-uint32_t pikaGC_markSweep(void);
-uint32_t pikaGC_printFreeList(void);
-
-int pika_GIL_EXIT(void);
-int pika_GIL_ENTER(void);
-int pika_GIL_getBareLock(void);
+int vm_gil_exit(void);
+int vm_gil_enter(void);
+int vm_gil_get_bare_lock(void);
 
 int32_t pika_debug_find_break_point_pc(char* pyFile, uint32_t pyLine);
 
@@ -848,8 +819,8 @@ typedef PikaObj PikaList;
 typedef PikaObj PikaTuple;
 typedef PikaObj PikaDict;
 
-pika_bool pika_GIL_isInit(void);
-int pika_GIL_deinit(void);
+pika_bool vm_gil_is_init(void);
+int vm_gil_deinit(void);
 
 pika_bool _bytes_contains(Arg* self, Arg* others);
 
